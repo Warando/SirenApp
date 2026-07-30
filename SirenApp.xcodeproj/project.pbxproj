@@ -6,8 +6,25 @@
 	objectVersion = 56;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F123456789012400 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012349 /* ContentView.swift */; };
+		F123456789012401 /* SirenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012402 /* SirenApp.swift */; };
+		F123456789012403 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012404 /* SceneDelegate.swift */; };
+		F123456789012405 /* siren.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012406 /* siren.mp3 */; };
+		F123456789012407 /* horn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012408 /* horn.mp3 */; };
+		F123456789012409 /* voice.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012410 /* voice.mp3 */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		F123456789012345 /* SirenApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SirenApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F123456789012349 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F123456789012350 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F123456789012351 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F123456789012402 /* SirenApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SirenApp.swift; sourceTree = "<group>"; };
+		F123456789012404 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		F123456789012406 /* siren.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = siren.mp3; sourceTree = "<group>"; };
+		F123456789012408 /* horn.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = horn.mp3; sourceTree = "<group>"; };
+		F123456789012410 /* voice.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = voice.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -23,9 +40,11 @@
 			isa = PBXGroup;
 			children = (
 				F123456789012349 /* ContentView.swift */,
+				F123456789012402 /* SirenApp.swift */,
+				F123456789012404 /* SceneDelegate.swift */,
 				F123456789012350 /* Info.plist */,
 				F123456789012351 /* Assets.xcassets */,
-				F123456789012352 /* Sounds */,
+				F123456789012411 /* Sounds */,
 			);
 			path = SirenApp;
 			sourceTree = "<group>";
@@ -38,7 +57,36 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		F123456789012411 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				F123456789012406 /* siren.mp3 */,
+				F123456789012408 /* horn.mp3 */,
+				F123456789012410 /* voice.mp3 */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F123456789012354 /* SirenApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F123456789012355 /* Build configuration list for PBXNativeTarget "SirenApp" */;
+			buildPhases = (
+				F123456789012413 /* Sources */,
+				F123456789012412 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SirenApp;
+			productName = SirenApp;
+			productReference = F123456789012345 /* SirenApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		F123456789012353 /* Project object */ = {
@@ -70,8 +118,31 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXTargetDependency section */
-/* End PBXTargetDependency section */
+/* Begin PBXResourcesBuildPhase section */
+		F123456789012412 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F123456789012405 /* siren.mp3 in Resources */,
+				F123456789012407 /* horn.mp3 in Resources */,
+				F123456789012409 /* voice.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F123456789012413 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F123456789012400 /* ContentView.swift in Sources */,
+				F123456789012401 /* SirenApp.swift in Sources */,
+				F123456789012403 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		F123456789012356 /* Debug */ = {
