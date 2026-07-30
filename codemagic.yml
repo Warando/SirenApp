@@ -1,0 +1,19 @@
+workflows:
+  ios:
+    name: iOS Build
+    environment:
+      ios_signing:
+        distribution_type: development
+      vars:
+        XCODE_PROJECT: "SirenApp.xcodeproj"
+        XCODE_SCHEME: "SirenApp"
+        BUNDLE_ID: "com.warando.sirenapp"
+    scripts:
+      - name: Build iOS app
+        script: |
+          xcode-project build \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --bundle-id "$BUNDLE_ID"
+    artifacts:
+      - build/ios/ipa/*.ipa
