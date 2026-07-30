@@ -21,19 +21,17 @@ jobs:
             -scheme SirenApp \
             -sdk iphoneos \
             -configuration Release \
-            -archivePath SirenApp.xcarchive \
-            archive
+            -derivedDataPath build \
+            build
 
-      - name: Export IPA
+      - name: Create .ipa
         run: |
-          xcodebuild \
-            -exportArchive \
-            -archivePath SirenApp.xcarchive \
-            -exportPath SirenApp \
-            -exportOptionsPlist ExportOptions.plist
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/SirenApp.app Payload/
+          zip -r SirenApp.ipa Payload/
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: SirenApp
-          path: SirenApp/SirenApp.ipa
+          path: SirenApp.ipa
