@@ -4,10 +4,10 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
-ios_signing:
-  distribution_type: development
-  certificate_type: development
-  bundle_identifier: com.arahmedovalbert.SirenApp
+      ios_signing:
+        distribution_type: development
+        certificate_type: development
+        bundle_identifier: com.arahmedovalbert.SirenApp
       vars:
         XCODE_PROJECT: "SirenApp.xcodeproj"
         XCODE_SCHEME: "SirenApp"
