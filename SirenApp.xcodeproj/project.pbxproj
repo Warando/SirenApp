@@ -12,6 +12,7 @@
 		F123456789012405 /* siren.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012406 /* siren.mp3 */; };
 		F123456789012407 /* horn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012408 /* horn.mp3 */; };
 		F123456789012409 /* voice.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012410 /* voice.mp3 */; };
+		F123456789012414 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012350 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -123,6 +124,7 @@
 				F123456789012405 /* siren.mp3 in Resources */,
 				F123456789012407 /* horn.mp3 in Resources */,
 				F123456789012409 /* voice.mp3 in Resources */,
+				F123456789012414 /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
