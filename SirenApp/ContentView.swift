@@ -137,12 +137,12 @@ struct ContentView: View {
         guard sound.type == .normal else { return }
         
         if isPressing {
-            // Мгновенный запуск при касании
+            // Нажал - включаем звук
             audioManager.stop()
             selectedSound = sound
             audioManager.playSound(sound: sound)
         } else {
-            // Мгновенная остановка при отпускании
+            // Отпустил - выключаем звук
             audioManager.stop()
             selectedSound = nil
         }
@@ -237,8 +237,7 @@ struct SoundButton: View {
         }
         .buttonStyle(PlainButtonStyle())
         .simultaneousGesture(
-            // Используем LongPressGesture с минимальной длительностью для мгновенного отклика
-            LongPressGesture(minimumDuration: 0.01)
+            DragGesture(minimumDistance: 0)
                 .onChanged { _ in
                     if sound.type == .normal && !isPressed {
                         isPressed = true
