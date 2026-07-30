@@ -6,10 +6,10 @@ workflows:
     environment:
       ios_signing:
         distribution_type: development
+        bundle_identifier: com.warando.sirenapp
       vars:
         XCODE_PROJECT: "SirenApp.xcodeproj"
         XCODE_SCHEME: "SirenApp"
-        BUNDLE_ID: "com.warando.sirenapp"
       xcode: latest
     scripts:
       - name: Build app
