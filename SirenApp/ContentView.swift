@@ -22,13 +22,14 @@ struct Sound: Identifiable {
 struct ContentView: View {
     @StateObject private var audioManager = AudioManager()
     @State private var selectedSound: Sound?
+    @State private var isHornPressed = false
 
     let sounds: [Sound] = ContentView.makeSounds()
 
     static func makeSounds() -> [Sound] {
         var result: [Sound] = []
         result.append(Sound(name: "Сирена", icon: "🚨", color: Color.red, file: "siren.mp3", type: SoundType.siren))
-        result.append(Sound(name: "Горн", icon: "📯", color: Color.purple, file: "horn.mp3", type: SoundType.loop))
+        result.append(Sound(name: "Горн", icon: "📯", color: Color.purple, file: "horn.mp3", type: SoundType.normal))
         result.append(Sound(name: "Команда", icon: "🎤", color: Color.blue, file: "voice.mp3", type: SoundType.loop))
         return result
     }
@@ -100,7 +101,8 @@ struct ContentView: View {
                     sound: sound,
                     isSelected: selectedSound?.id == sound.id,
                     isPlaying: audioManager.isPlaying && selectedSound?.id == sound.id,
-                    action: { handleSoundTap(sound: sound) }
+                    action: { handleSoundTap(sound: sound) },
+                    touchAction: { isPressing in handleTouch(sound: sound, isPressing: isPressing) }
                 )
             }
         }
@@ -111,6 +113,7 @@ struct ContentView: View {
         StopButton {
             audioManager.stopWithFadeOut()
             selectedSound = nil
+            isHornPressed = false
         }
     }
 
@@ -119,12 +122,29 @@ struct ContentView: View {
     }
 
     func handleSoundTap(sound: Sound) {
+        if sound.type == .normal { return }
+        
         if selectedSound?.id == sound.id && audioManager.isPlaying {
             audioManager.stopWithFadeOut()
             selectedSound = nil
         } else {
             selectedSound = sound
             audioManager.playSound(sound: sound)
+        }
+    }
+    
+    func handleTouch(sound: Sound, isPressing: Bool) {
+        guard sound.type == .normal else { return }
+        
+        if isPressing {
+            // Нажал - включаем звук
+            audioManager.stop()
+            selectedSound = sound
+            audioManager.playSound(sound: sound)
+        } else {
+            // Отпустил - выключаем звук
+            audioManager.stop()
+            selectedSound = nil
         }
     }
 }
@@ -188,6 +208,7 @@ struct SoundButton: View {
     let isSelected: Bool
     let isPlaying: Bool
     let action: () -> Void
+    let touchAction: (Bool) -> Void
 
     @State private var isPressed: Bool = false
 
@@ -197,8 +218,10 @@ struct SoundButton: View {
 
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                action()
+            if sound.type != .normal {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    action()
+                }
             }
         }) {
             HStack(spacing: 20) {
@@ -213,6 +236,21 @@ struct SoundButton: View {
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if sound.type == .normal && !isPressed {
+                        isPressed = true
+                        touchAction(true)
+                    }
+                }
+                .onEnded { _ in
+                    if sound.type == .normal && isPressed {
+                        isPressed = false
+                        touchAction(false)
+                    }
+                }
+        )
     }
 
     var soundIcon: some View {
@@ -253,7 +291,7 @@ struct SoundButton: View {
                         .foregroundColor(sound.color)
                 }
             } else {
-                Text("Нажмите")
+                Text(sound.type == .normal ? "Удерживайте" : "Нажмите")
                     .font(.system(size: 11))
                     .foregroundColor(.gray)
             }
