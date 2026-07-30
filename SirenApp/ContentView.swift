@@ -2,12 +2,11 @@ import SwiftUI
 import AVFoundation
 import Combine
 
-// MARK: - Sound Model (вынесено наружу, чтобы не было проблем с вложенными типами)
-
+// MARK: - Sound Model
 enum SoundType {
-    case normal
-    case loop
-    case siren
+    case normal   // Для Горна (один раз)
+    case loop     // Для Команды (бесконечно)
+    case siren    // Для Сирены (бесконечно с анимацией)
 }
 
 struct Sound: Identifiable {
@@ -20,10 +19,10 @@ struct Sound: Identifiable {
 }
 
 // MARK: - ContentView
-
 struct ContentView: View {
     @StateObject private var audioManager = AudioManager()
     @State private var selectedSound: Sound?
+    @State private var isHornPressed = false // Для отслеживания удержания Горна
 
     let sounds: [Sound] = ContentView.makeSounds()
 
@@ -31,7 +30,7 @@ struct ContentView: View {
         var result: [Sound] = []
         result.append(Sound(name: "Сирена", icon: "🚨", color: Color.red, file: "siren.mp3", type: SoundType.siren))
         result.append(Sound(name: "Горн", icon: "📯", color: Color.purple, file: "horn.mp3", type: SoundType.normal))
-        result.append(Sound(name: "Команда", icon: "🎤", color: Color.blue, file: "voice.mp3", type: SoundType.normal))
+        result.append(Sound(name: "Команда", icon: "🎤", color: Color.blue, file: "voice.mp3", type: SoundType.loop))
         return result
     }
 
@@ -42,7 +41,6 @@ struct ContentView: View {
         }
     }
 
-    // Фон
     var backgroundGradient: some View {
         LinearGradient(
             gradient: Gradient(colors: [
@@ -55,7 +53,6 @@ struct ContentView: View {
         .ignoresSafeArea()
     }
 
-    // Основной контент
     var mainContent: some View {
         VStack(spacing: 25) {
             headerView
@@ -69,29 +66,26 @@ struct ContentView: View {
         }
     }
 
-    // Заголовок
     var headerView: some View {
         VStack(spacing: 5) {
             HStack {
                 Image(systemName: "radio.fill")
-                    .font(.title)
+                    .font(.title2)
                     .foregroundColor(.blue)
                 Text("СГУ")
-                    .font(.system(size: 38, weight: .bold))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundColor(.white)
                 Text("РАЦИЯ")
-                    .font(.system(size: 38, weight: .bold))
+                    .font(.system(size: 30, weight: .bold))
                     .foregroundColor(.blue)
             }
-
             Text("Станция Громкоговорящего Управления")
-                .font(.system(size: 13, weight: .medium))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundColor(.gray)
         }
-        .padding(.top, 30)
+        .padding(.top, 20)
     }
 
-    // Статус
     var statusView: some View {
         StatusView(
             status: audioManager.status,
@@ -100,7 +94,6 @@ struct ContentView: View {
         )
     }
 
-    // Кнопки звуков
     var soundButtons: some View {
         VStack(spacing: 20) {
             ForEach(sounds) { sound in
@@ -108,28 +101,33 @@ struct ContentView: View {
                     sound: sound,
                     isSelected: selectedSound?.id == sound.id,
                     isPlaying: audioManager.isPlaying && selectedSound?.id == sound.id,
-                    action: { handleSoundTap(sound: sound) }
+                    action: { handleSoundTap(sound: sound) },
+                    touchAction: { isPressing in handleTouch(sound: sound, isPressing: isPressing) } // Передаем замыкание для горна
                 )
             }
         }
         .padding(.horizontal, 30)
     }
 
-    // Кнопка стоп
     var stopButton: some View {
         StopButton {
             audioManager.stop()
             selectedSound = nil
+            isHornPressed = false
         }
     }
 
-    // Громкость
     var volumeControl: some View {
         VolumeControl(volume: $audioManager.volume)
     }
 
-    // Обработчик нажатия
+    // Обработчик для обычного нажатия (Сирена, Команда)
     func handleSoundTap(sound: Sound) {
+        // Горн обрабатывается через touchAction, поэтому пропускаем его здесь
+        if sound.type == .normal {
+            return
+        }
+        
         if selectedSound?.id == sound.id && audioManager.isPlaying {
             audioManager.stop()
             selectedSound = nil
@@ -138,10 +136,27 @@ struct ContentView: View {
             audioManager.playSound(sound: sound)
         }
     }
+    
+    // Обработчик для удержания (Горн)
+    func handleTouch(sound: Sound, isPressing: Bool) {
+        // Работает только для Горна (.normal)
+        guard sound.type == .normal else { return }
+        
+        if isPressing {
+            // Нажал - включаем звук
+            // Останавливаем всё, что могло играть
+            audioManager.stop()
+            selectedSound = sound
+            audioManager.playSound(sound: sound)
+        } else {
+            // Отпустил - выключаем звук
+            audioManager.stop()
+            selectedSound = nil
+        }
+    }
 }
 
 // MARK: - Status View
-
 struct StatusView: View {
     let status: String
     let isPlaying: Bool
@@ -163,25 +178,25 @@ struct StatusView: View {
         HStack(spacing: 12) {
             Circle()
                 .fill(statusColor)
-                .frame(width: 14, height: 14)
+                .frame(width: 12, height: 12)
                 .scaleEffect(isPlaying ? 1.3 : 1.0)
                 .animation(pulseAnimation, value: isPlaying)
 
             Text(status)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(statusColor)
 
             if let sound = currentSound, isPlaying {
                 Text("•")
                     .foregroundColor(.gray)
                 Text("\(sound.icon) \(sound.name)")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundColor(sound.color)
                     .transition(.opacity)
             }
         }
-        .padding(.horizontal, 25)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 25)
                 .fill(Color(white: 0.12))
@@ -195,12 +210,12 @@ struct StatusView: View {
 }
 
 // MARK: - Sound Button
-
 struct SoundButton: View {
     let sound: Sound
     let isSelected: Bool
     let isPlaying: Bool
     let action: () -> Void
+    let touchAction: (Bool) -> Void // Добавляем обработчик для удержания
 
     @State private var isPressed: Bool = false
 
@@ -210,8 +225,11 @@ struct SoundButton: View {
 
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                action()
+            // Для обычных кнопок (не Горн) - стандартное действие
+            if sound.type != .normal {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    action()
+                }
             }
         }) {
             HStack(spacing: 20) {
@@ -226,21 +244,39 @@ struct SoundButton: View {
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        // Добавляем жест для Горна
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    // Если это Горн и он ещё не зажат
+                    if sound.type == .normal && !isPressed {
+                        isPressed = true
+                        touchAction(true) // Сигналим о начале удержания
+                    }
+                }
+                .onEnded { _ in
+                    // Если это Горн и он был зажат
+                    if sound.type == .normal && isPressed {
+                        isPressed = false
+                        touchAction(false) // Сигналим об окончании удержания
+                    }
+                }
+        )
     }
 
     var soundIcon: some View {
         ZStack {
             Circle()
                 .fill(sound.color.opacity(isSelected ? 0.3 : 0.15))
-                .frame(width: 60, height: 60)
+                .frame(width: 50, height: 50)
 
             Text(sound.icon)
-                .font(.system(size: 32))
+                .font(.system(size: 28))
 
             if isPlaying && isSelected {
                 Circle()
                     .stroke(sound.color, lineWidth: 3)
-                    .frame(width: 60, height: 60)
+                    .frame(width: 50, height: 50)
                     .scaleEffect(1.2)
                     .opacity(0.8)
                     .animation(ringAnimation, value: isPlaying)
@@ -251,7 +287,7 @@ struct SoundButton: View {
     var soundInfo: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(sound.name)
-                .font(.system(size: 22, weight: .bold))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(isSelected ? sound.color : .white)
 
             if isPlaying && isSelected {
@@ -259,15 +295,15 @@ struct SoundButton: View {
                     ForEach(0..<3, id: \.self) { _ in
                         Circle()
                             .fill(sound.color)
-                            .frame(width: 6, height: 6)
+                            .frame(width: 5, height: 5)
                     }
                     Text("ИГРАЕТ")
-                        .font(.system(size: 11, weight: .bold))
+                        .font(.system(size: 10, weight: .bold))
                         .foregroundColor(sound.color)
                 }
             } else {
-                Text("Нажмите для воспроизведения")
-                    .font(.system(size: 13))
+                Text(sound.type == .normal ? "Удерживайте" : "Нажмите")
+                    .font(.system(size: 11))
                     .foregroundColor(.gray)
             }
         }
@@ -275,7 +311,7 @@ struct SoundButton: View {
 
     var playIcon: some View {
         Image(systemName: isPlaying && isSelected ? "pause.circle.fill" : "play.circle.fill")
-            .font(.system(size: 30))
+            .font(.system(size: 26))
             .foregroundColor(isSelected ? sound.color : .gray)
     }
 
@@ -290,7 +326,6 @@ struct SoundButton: View {
 }
 
 // MARK: - Stop Button
-
 struct StopButton: View {
     let action: () -> Void
 
@@ -304,18 +339,18 @@ struct StopButton: View {
         }) {
             HStack(spacing: 15) {
                 Image(systemName: "stop.circle.fill")
-                    .font(.system(size: 28))
+                    .font(.system(size: 24))
 
                 Text("ОСТАНОВИТЬ ВСЕ")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
 
                 Spacer()
 
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 24))
+                    .font(.system(size: 20))
             }
-            .padding(.horizontal, 25)
-            .padding(.vertical, 18)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(Color.red.opacity(0.2))
@@ -333,7 +368,6 @@ struct StopButton: View {
 }
 
 // MARK: - Volume Control
-
 struct VolumeControl: View {
     @Binding var volume: Float
 
@@ -341,22 +375,22 @@ struct VolumeControl: View {
         HStack(spacing: 12) {
             Image(systemName: "speaker.fill")
                 .foregroundColor(.white.opacity(0.6))
-                .font(.system(size: 16))
+                .font(.system(size: 14))
 
             Slider(value: $volume, in: 0...1)
                 .tint(.white)
 
             Image(systemName: "speaker.wave.3.fill")
                 .foregroundColor(.white.opacity(0.6))
-                .font(.system(size: 16))
+                .font(.system(size: 14))
 
             Text("\(Int(volume * 100))%")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.white)
-                .frame(width: 40)
+                .frame(width: 35)
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color(white: 0.08))
@@ -370,7 +404,6 @@ struct VolumeControl: View {
 }
 
 // MARK: - Audio Manager
-
 final class AudioManager: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var status: String = "ГОТОВ"
@@ -388,6 +421,7 @@ final class AudioManager: ObservableObject {
     private var playerNode: AVAudioPlayerNode?
 
     func playSound(sound: Sound) {
+        // Если этот же звук уже играет - останавливаем (для кнопок)
         if currentSound?.id == sound.id && isPlaying {
             stop()
             return
@@ -416,7 +450,6 @@ final class AudioManager: ObservableObject {
                 generateSound(sound: sound)
             }
         } else {
-            // Файл не найден в бандле — генерируем звук программно
             generateSound(sound: sound)
         }
     }
@@ -523,7 +556,6 @@ final class AudioManager: ObservableObject {
 }
 
 // MARK: - Preview
-
 #Preview {
     ContentView()
 }
