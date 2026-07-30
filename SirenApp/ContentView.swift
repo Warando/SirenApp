@@ -4,9 +4,9 @@ import Combine
 
 // MARK: - Sound Model
 enum SoundType {
-    case normal   // Для Горна (один раз)
-    case loop     // Для Команды (бесконечно)
-    case siren    // Для Сирены (бесконечно с анимацией)
+    case normal
+    case loop
+    case siren
 }
 
 struct Sound: Identifiable {
@@ -22,14 +22,13 @@ struct Sound: Identifiable {
 struct ContentView: View {
     @StateObject private var audioManager = AudioManager()
     @State private var selectedSound: Sound?
-    @State private var isHornPressed = false // Для отслеживания удержания Горна
 
     let sounds: [Sound] = ContentView.makeSounds()
 
     static func makeSounds() -> [Sound] {
         var result: [Sound] = []
         result.append(Sound(name: "Сирена", icon: "🚨", color: Color.red, file: "siren.mp3", type: SoundType.siren))
-        result.append(Sound(name: "Горн", icon: "📯", color: Color.purple, file: "horn.mp3", type: SoundType.normal))
+        result.append(Sound(name: "Горн", icon: "📯", color: Color.purple, file: "horn.mp3", type: SoundType.loop))
         result.append(Sound(name: "Команда", icon: "🎤", color: Color.blue, file: "voice.mp3", type: SoundType.loop))
         return result
     }
@@ -101,8 +100,7 @@ struct ContentView: View {
                     sound: sound,
                     isSelected: selectedSound?.id == sound.id,
                     isPlaying: audioManager.isPlaying && selectedSound?.id == sound.id,
-                    action: { handleSoundTap(sound: sound) },
-                    touchAction: { isPressing in handleTouch(sound: sound, isPressing: isPressing) } // Передаем замыкание для горна
+                    action: { handleSoundTap(sound: sound) }
                 )
             }
         }
@@ -111,9 +109,8 @@ struct ContentView: View {
 
     var stopButton: some View {
         StopButton {
-            audioManager.stop()
+            audioManager.stopWithFadeOut()
             selectedSound = nil
-            isHornPressed = false
         }
     }
 
@@ -121,37 +118,13 @@ struct ContentView: View {
         VolumeControl(volume: $audioManager.volume)
     }
 
-    // Обработчик для обычного нажатия (Сирена, Команда)
     func handleSoundTap(sound: Sound) {
-        // Горн обрабатывается через touchAction, поэтому пропускаем его здесь
-        if sound.type == .normal {
-            return
-        }
-        
         if selectedSound?.id == sound.id && audioManager.isPlaying {
-            audioManager.stop()
+            audioManager.stopWithFadeOut()
             selectedSound = nil
         } else {
             selectedSound = sound
             audioManager.playSound(sound: sound)
-        }
-    }
-    
-    // Обработчик для удержания (Горн)
-    func handleTouch(sound: Sound, isPressing: Bool) {
-        // Работает только для Горна (.normal)
-        guard sound.type == .normal else { return }
-        
-        if isPressing {
-            // Нажал - включаем звук
-            // Останавливаем всё, что могло играть
-            audioManager.stop()
-            selectedSound = sound
-            audioManager.playSound(sound: sound)
-        } else {
-            // Отпустил - выключаем звук
-            audioManager.stop()
-            selectedSound = nil
         }
     }
 }
@@ -215,7 +188,6 @@ struct SoundButton: View {
     let isSelected: Bool
     let isPlaying: Bool
     let action: () -> Void
-    let touchAction: (Bool) -> Void // Добавляем обработчик для удержания
 
     @State private var isPressed: Bool = false
 
@@ -225,11 +197,8 @@ struct SoundButton: View {
 
     var body: some View {
         Button(action: {
-            // Для обычных кнопок (не Горн) - стандартное действие
-            if sound.type != .normal {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    action()
-                }
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                action()
             }
         }) {
             HStack(spacing: 20) {
@@ -244,24 +213,6 @@ struct SoundButton: View {
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
-        // Добавляем жест для Горна
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    // Если это Горн и он ещё не зажат
-                    if sound.type == .normal && !isPressed {
-                        isPressed = true
-                        touchAction(true) // Сигналим о начале удержания
-                    }
-                }
-                .onEnded { _ in
-                    // Если это Горн и он был зажат
-                    if sound.type == .normal && isPressed {
-                        isPressed = false
-                        touchAction(false) // Сигналим об окончании удержания
-                    }
-                }
-        )
     }
 
     var soundIcon: some View {
@@ -302,7 +253,7 @@ struct SoundButton: View {
                         .foregroundColor(sound.color)
                 }
             } else {
-                Text(sound.type == .normal ? "Удерживайте" : "Нажмите")
+                Text("Нажмите")
                     .font(.system(size: 11))
                     .foregroundColor(.gray)
             }
@@ -419,11 +370,11 @@ final class AudioManager: ObservableObject {
     private var timer: Timer?
     private var engine: AVAudioEngine?
     private var playerNode: AVAudioPlayerNode?
+    private var fadeTimer: Timer?
 
     func playSound(sound: Sound) {
-        // Если этот же звук уже играет - останавливаем (для кнопок)
         if currentSound?.id == sound.id && isPlaying {
-            stop()
+            stopWithFadeOut()
             return
         }
 
@@ -538,7 +489,40 @@ final class AudioManager: ObservableObject {
         timer = newTimer
     }
 
+    func stopWithFadeOut(duration: TimeInterval = 0.3) {
+        guard let player = audioPlayer else {
+            stop()
+            return
+        }
+
+        let startVolume = player.volume
+        let steps = 20
+        let stepDuration = duration / Double(steps)
+        var currentStep = 0
+
+        fadeTimer?.invalidate()
+        fadeTimer = Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+            currentStep += 1
+            let progress = Float(currentStep) / Float(steps)
+            let newVolume = startVolume * (1 - progress)
+
+            player.volume = newVolume
+
+            if currentStep >= steps {
+                timer.invalidate()
+                self.stop()
+            }
+        }
+    }
+
     func stop() {
+        fadeTimer?.invalidate()
+        fadeTimer = nil
+
         audioPlayer?.stop()
         audioPlayer = nil
 
