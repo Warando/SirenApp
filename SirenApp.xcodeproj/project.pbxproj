@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		F123456789012400 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012349 /* ContentView.swift */; };
 		F123456789012401 /* SirenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012402 /* SirenApp.swift */; };
-		F123456789012403 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F123456789012404 /* SceneDelegate.swift */; };
 		F123456789012405 /* siren.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012406 /* siren.mp3 */; };
 		F123456789012407 /* horn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012408 /* horn.mp3 */; };
 		F123456789012409 /* voice.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F123456789012410 /* voice.mp3 */; };
@@ -21,7 +20,6 @@
 		F123456789012350 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F123456789012351 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F123456789012402 /* SirenApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SirenApp.swift; sourceTree = "<group>"; };
-		F123456789012404 /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		F123456789012406 /* siren.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = siren.mp3; sourceTree = "<group>"; };
 		F123456789012408 /* horn.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = horn.mp3; sourceTree = "<group>"; };
 		F123456789012410 /* voice.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = voice.mp3; sourceTree = "<group>"; };
@@ -41,7 +39,6 @@
 			children = (
 				F123456789012349 /* ContentView.swift */,
 				F123456789012402 /* SirenApp.swift */,
-				F123456789012404 /* SceneDelegate.swift */,
 				F123456789012350 /* Info.plist */,
 				F123456789012351 /* Assets.xcassets */,
 				F123456789012411 /* Sounds */,
@@ -138,7 +135,6 @@
 			files = (
 				F123456789012400 /* ContentView.swift in Sources */,
 				F123456789012401 /* SirenApp.swift in Sources */,
-				F123456789012403 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
