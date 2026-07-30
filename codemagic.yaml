@@ -12,15 +12,10 @@ workflows:
         BUNDLE_ID: "com.warando.sirenapp"
       xcode: latest
     scripts:
-      - name: Build iOS app
+      - name: Build app
         script: |
           xcode-project build \
             --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --bundle-id "$BUNDLE_ID"
+            --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
-    publishing:
-      email:
-        recipients:
-          - arahmedovalbert@gmail.com
