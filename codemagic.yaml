@@ -1,6 +1,8 @@
 workflows:
-  ios:
+  ios-workflow:
     name: iOS Build
+    max_build_duration: 120
+    instance_type: mac_mini_m2
     environment:
       ios_signing:
         distribution_type: development
@@ -8,6 +10,7 @@ workflows:
         XCODE_PROJECT: "SirenApp.xcodeproj"
         XCODE_SCHEME: "SirenApp"
         BUNDLE_ID: "com.warando.sirenapp"
+      xcode: latest
     scripts:
       - name: Build iOS app
         script: |
@@ -17,3 +20,7 @@ workflows:
             --bundle-id "$BUNDLE_ID"
     artifacts:
       - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - arahmedovalbert@gmail.com
